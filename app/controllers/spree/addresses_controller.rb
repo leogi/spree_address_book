@@ -21,7 +21,7 @@ class Spree::AddressesController < Spree::StoreController
 
   def update
     if @address.editable?
-      if @address.update_attributes(params[:address])
+      if @address.update_attributes(model_params)
         flash[:notice] = Spree.t(:successfully_updated, :resource => Spree.t(:address, scope: "address_book"))
         redirect_back_or_default(account_path)
       else
@@ -29,7 +29,7 @@ class Spree::AddressesController < Spree::StoreController
       end
     else
       new_address = @address.clone
-      new_address.attributes = params[:address]
+      new_address.attributes = model_params
       @address.update_attribute(:deleted_at, Time.now)
       if new_address.save
         flash[:notice] = Spree.t(:successfully_updated, :resource => Spree.t(:address, scope: "address_book"))
@@ -41,7 +41,7 @@ class Spree::AddressesController < Spree::StoreController
   end
 
   def create
-    @address = Spree::Address.new(params[:address])
+    @address = Spree::Address.new(model_params)
     @address.user = try_spree_current_user
     if @address.save
       flash[:notice] = Spree.t(:successfully_created, :resource => Spree.t(:address, scope: "address_book"))
@@ -56,5 +56,10 @@ class Spree::AddressesController < Spree::StoreController
 
     flash[:notice] = Spree.t(:successfully_removed, :resource => t(:address, scope: "address_book"))
     redirect_to(request.env['HTTP_REFERER'] || account_path) unless request.xhr?
+  end
+
+  private
+  def model_params
+    params.require(:address).permit(Spree::Address.updatable_attrs)
   end
 end

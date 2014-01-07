@@ -1,8 +1,6 @@
 Spree::Address.class_eval do
   belongs_to :user, :class_name => Spree.user_class.to_s
 
-  attr_accessible :user_id, :deleted_at
-
   def self.required_fields
     validator = Spree::Address.validators.find{|v| v.kind_of?(ActiveModel::Validations::PresenceValidator)}
     validator ? validator.attributes : []
@@ -40,6 +38,12 @@ Spree::Address.class_eval do
       super
     else
       update_column :deleted_at, Time.now
+    end
+  end
+
+  class << self
+    def updatable_attrs
+      [:firstname, :lastname, :address1, :address2, :city, :zipcode, :country_id, :phone, :state_id]
     end
   end
 end
